@@ -5,7 +5,7 @@ date: "`r lubridate::today()`"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup}
 library(tidyverse)
 library(geonames)
 library(countrycode)
@@ -16,13 +16,16 @@ key <- getOption("geonamesUsername") # Call geonames username to access data
 theme_set(new = theme_minimal())
 ```
 
-```{r import & merge data, message = FALSE}
+```{r import & merge data}
 # Import data 
 gapminder_df <- gapminder::gapminder
-geonames_df <- GNcountryInfo()
+geonames_df <- GNcountryInfo() %>%
+  rename(
+    country = countryCode
+  )
 
 # Create key to join
-gadminder_key <- gapminder_df %>%
+gapminder_key <- gapminder_df %>%
   mutate(
     country = countrycode(
       country, 
@@ -31,9 +34,32 @@ gadminder_key <- gapminder_df %>%
     )
   )
 
+# Merge dataframes based on the country variable
+all_variables <- left_join(
+  gapminder_key, geonames_df, by = "country"
+  ) %>%
+  select( # Select only variables of interest for this exercise
+   country,
+   lifeExp,
+   pop,
+   areaInSqKm, 
+   year
+  ) %>%
+  mutate(
+    areaInSqKm = as.numeric(areaInSqKm))
+
+```
+
+```{r correlation lifeExp & pop density}
+# Add new variable for pop density 
+all_variables <- all_variables %>%
+  mutate(
+    pop_density = pop / areaInSqKm
+  )
 
 
 ```
+
 
 ## Session info
 
