@@ -1,10 +1,39 @@
 ---
 title: "Effect of Population Density on Life Expectancy"
-author: "YOUR NAME"
+author: "Maria Benavides"
 date: "`r lubridate::today()`"
 output: github_document
 ---
 
+```{r setup, include=FALSE}
+library(tidyverse)
+library(geonames)
+library(countrycode)
+library(here)
+library(kableExtra)
+
+key <- getOption("geonamesUsername") # Call geonames username to access data
+theme_set(new = theme_minimal())
+```
+
+```{r import & merge data, message = FALSE}
+# Import data 
+gapminder_df <- gapminder::gapminder
+geonames_df <- GNcountryInfo()
+
+# Create key to join
+gadminder_key <- gapminder_df %>%
+  mutate(
+    country = countrycode(
+      country, 
+      origin = "country.name", 
+      destination = "iso2c"
+    )
+  )
+
+
+
+```
 
 ## Session info
 
