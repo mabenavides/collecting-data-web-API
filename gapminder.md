@@ -4,6 +4,18 @@ Maria Benavides
 2020-05-31
 
 ``` r
+library(tidyverse)
+library(geonames)
+library(countrycode)
+library(here)
+library(broom)
+library(kableExtra)
+
+key <- getOption("geonamesUsername") # Call geonames username to access data
+theme_set(new = theme_minimal())
+```
+
+``` r
 # Import data 
 gapminder_df <- gapminder::gapminder
 geonames_df <- GNcountryInfo() %>%
@@ -29,9 +41,184 @@ all_variables <- left_join(
    country,
    lifeExp,
    pop,
-   areaInSqKm
+   areaInSqKm, 
+   year
+  ) %>%
+  mutate(
+    areaInSqKm = as.numeric(areaInSqKm))
+
+# Add new variable for pop density 
+all_variables <- all_variables %>%
+  mutate(
+    pop_density = pop / areaInSqKm
   )
 ```
+
+``` r
+# Run a regression model 
+regression_popden_lifeexp <- lm(lifeExp ~ pop_density, data = all_variables)
+regr_table <- tidy(regression_popden_lifeexp) %>%
+  rename(
+    "Predictor" = term,
+    "B" = estimate, 
+    "SE" = std.error, 
+    "t" = statistic, 
+    "p" = p.value
+    ) 
+kable(regr_table, 
+      digits = 3, 
+      caption = "Table correlation between life expectancy and population density"
+      ) 
+```
+
+<table>
+
+<caption>
+
+Table correlation between life expectancy and population density
+
+</caption>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+Predictor
+
+</th>
+
+<th style="text-align:right;">
+
+B
+
+</th>
+
+<th style="text-align:right;">
+
+SE
+
+</th>
+
+<th style="text-align:right;">
+
+t
+
+</th>
+
+<th style="text-align:right;">
+
+p
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+(Intercept)
+
+</td>
+
+<td style="text-align:right;">
+
+58.748
+
+</td>
+
+<td style="text-align:right;">
+
+0.318
+
+</td>
+
+<td style="text-align:right;">
+
+184.616
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+pop\_density
+
+</td>
+
+<td style="text-align:right;">
+
+0.005
+
+</td>
+
+<td style="text-align:right;">
+
+0.001
+
+</td>
+
+<td style="text-align:right;">
+
+8.508
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+Using a simple OLS model that considers life expectancy as the dependent
+variable and population density as the independent, we see that there is
+a positive correlation between those, which is statistically
+significant; this suggests that places with higher population density
+have a higher life expectancy.
+
+``` r
+#Plot the correlation
+ggplot(all_variables, aes(x=pop_density, y=lifeExp)) + 
+  geom_point(alpha = 0.2) +
+  geom_smooth(method=lm)+
+  labs(
+    title = "Correlation between life expectancy and population density", 
+    x = "Population density", 
+    y = "Life expectancy"
+  )
+```
+
+    ## `geom_smooth()` using formula 'y ~ x'
+
+![](gapminder_files/figure-gfm/correlation%20graph-1.png)<!-- -->
+
+The graph is shows visually what the model predicted, that is to say,
+there is a positive significant correlation between life expectancy and
+population density. Nonetheless, it is worth mentioning that this graph
+is showing us that there are outliers in our data frame. Singapore and
+Hong Kong are extremely dense, and might biases these
+    results.
 
 ## Session info
 
@@ -55,7 +242,7 @@ devtools::session_info()
     ##  package     * version date       lib source        
     ##  assertthat    0.2.1   2019-03-21 [2] CRAN (R 3.6.3)
     ##  backports     1.1.5   2019-10-02 [2] CRAN (R 3.6.3)
-    ##  broom         0.5.6   2020-04-20 [1] CRAN (R 3.6.3)
+    ##  broom       * 0.5.6   2020-04-20 [1] CRAN (R 3.6.3)
     ##  callr         3.4.3   2020-03-28 [2] CRAN (R 3.6.3)
     ##  cellranger    1.1.0   2016-07-27 [2] CRAN (R 3.6.3)
     ##  cli           2.0.2   2020-02-28 [2] CRAN (R 3.6.3)
@@ -71,6 +258,7 @@ devtools::session_info()
     ##  ellipsis      0.3.0   2019-09-20 [2] CRAN (R 3.6.3)
     ##  evaluate      0.14    2019-05-28 [2] CRAN (R 3.6.3)
     ##  fansi         0.4.1   2020-01-08 [2] CRAN (R 3.6.3)
+    ##  farver        2.0.3   2020-01-16 [2] CRAN (R 3.6.3)
     ##  forcats     * 0.5.0   2020-03-01 [2] CRAN (R 3.6.3)
     ##  fs            1.4.0   2020-03-31 [2] CRAN (R 3.6.3)
     ##  gapminder     0.3.0   2017-10-31 [2] CRAN (R 3.6.3)
@@ -81,17 +269,21 @@ devtools::session_info()
     ##  gtable        0.3.0   2019-03-25 [2] CRAN (R 3.6.3)
     ##  haven         2.2.0   2019-11-08 [2] CRAN (R 3.6.3)
     ##  here        * 0.1     2017-05-28 [1] CRAN (R 3.6.3)
+    ##  highr         0.8     2019-03-20 [2] CRAN (R 3.6.3)
     ##  hms           0.5.3   2020-01-08 [2] CRAN (R 3.6.3)
     ##  htmltools     0.4.0   2019-10-04 [2] CRAN (R 3.6.3)
     ##  httr          1.4.1   2019-08-05 [2] CRAN (R 3.6.3)
     ##  jsonlite      1.6.1   2020-02-02 [2] CRAN (R 3.6.3)
     ##  kableExtra  * 1.1.0   2019-03-16 [1] CRAN (R 3.6.3)
     ##  knitr         1.28    2020-02-06 [2] CRAN (R 3.6.3)
+    ##  labeling      0.3     2014-08-23 [2] CRAN (R 3.6.3)
     ##  lattice       0.20-38 2018-11-04 [2] CRAN (R 3.6.3)
     ##  lifecycle     0.2.0   2020-03-06 [2] CRAN (R 3.6.3)
     ##  lubridate     1.7.8   2020-04-06 [1] CRAN (R 3.6.3)
     ##  magrittr      1.5     2014-11-22 [2] CRAN (R 3.6.3)
+    ##  Matrix        1.2-18  2019-11-27 [2] CRAN (R 3.6.3)
     ##  memoise       1.1.0   2017-04-21 [2] CRAN (R 3.6.3)
+    ##  mgcv          1.8-31  2019-11-09 [2] CRAN (R 3.6.3)
     ##  modelr        0.1.6   2020-02-22 [2] CRAN (R 3.6.3)
     ##  munsell       0.5.0   2018-06-12 [2] CRAN (R 3.6.3)
     ##  nlme          3.1-144 2020-02-06 [2] CRAN (R 3.6.3)

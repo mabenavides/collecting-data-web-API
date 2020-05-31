@@ -5,11 +5,12 @@ date: "`r lubridate::today()`"
 output: github_document
 ---
 
-```{r setup}
+```{r setup, message=FALSE}
 library(tidyverse)
 library(geonames)
 library(countrycode)
 library(here)
+library(broom)
 library(kableExtra)
 
 key <- getOption("geonamesUsername") # Call geonames username to access data
@@ -48,9 +49,6 @@ all_variables <- left_join(
   mutate(
     areaInSqKm = as.numeric(areaInSqKm))
 
-```
-
-```{r correlation lifeExp & pop density}
 # Add new variable for pop density 
 all_variables <- all_variables %>%
   mutate(
@@ -60,6 +58,39 @@ all_variables <- all_variables %>%
 
 ```
 
+```{r correlation lifeExp pop density}
+# Run a regression model 
+regression_popden_lifeexp <- lm(lifeExp ~ pop_density, data = all_variables)
+regr_table <- tidy(regression_popden_lifeexp) %>%
+  rename(
+    "Predictor" = term,
+    "B" = estimate, 
+    "SE" = std.error, 
+    "t" = statistic, 
+    "p" = p.value
+    ) 
+kable(regr_table, 
+      digits = 3, 
+      caption = "Table correlation between life expectancy and population density"
+      ) 
+```
+
+Using a simple OLS model that considers life expectancy as the dependent variable and population density as the independent, we see that there is a positive correlation between those, which is statistically significant; this suggests that places with higher population density have a higher life expectancy. 
+
+```{r correlation graph}
+#Plot the correlation
+ggplot(all_variables, aes(x=pop_density, y=lifeExp)) + 
+  geom_point(alpha = 0.2) +
+  geom_smooth(method=lm)+
+  labs(
+    title = "Correlation between life expectancy and population density", 
+    x = "Population density", 
+    y = "Life expectancy"
+  )
+
+```
+
+The graph is shows visually what the model predicted, that is to say, there is a positive significant correlation between life expectancy and population density. Nonetheless, it is worth mentioning that this graph is showing us that there are outliers in our data frame. Singapore and Hong Kong are extremely dense, and might biases these results. 
 
 ## Session info
 
