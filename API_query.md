@@ -1,21 +1,77 @@
 Crime during COVID-19 shelter in place
 ================
 Maria Benavides
-2020-05-31
+2020-06-01
 
 ``` r
-library(RSocrata)
+library(RSocrata) # Install and run package to access data 
 library(tidyverse)
 library(broom)
 library(kableExtra)
+```
 
+``` r
+# Import data using token
 chicago_crime <- read.socrata(
   "https://data.cityofchicago.org/resource/ijzp-q8t2.json?year=2020",
-  app_token = getOption("socrata_token"),
+  app_token = getOption("socrata_token"), # Replace for your own Socrata token, email and password
   email     = getOption("socrata_username"),
   password  = getOption("socrata_password")
-)
+) %>%
+  select(id, date, primary_type, arrest) %>% 
+  filter(primary_type %in% c("ROBBERY", "THEFT", "BURGLARY", "MOTOR VEHICLE THEFT"))
+
+
+# Create a csv file with the dataframe
+write_csv(chicago_crime, path = "chicago_crime_2020.csv") 
 ```
+
+With data stored in the Chicago open data website, and using the Socrata
+API, we are trying to determine whether there is any variation in the
+trends of crimes related with robbery, after the shelter-in-place
+measure was established in Chicago, back in March 21st.
+
+``` r
+# Create plot for trend of crimes
+ggplot(chicago_crime, aes(x = date)) +
+  geom_histogram() +
+  facet_wrap(~ primary_type) +
+  labs(title = "Variation in robbery related crimes in Chicago during 2020", 
+       y = "Number of reported crimes", 
+       x = "Month") 
+```
+
+![](API_query_files/figure-gfm/analysis-1.png)<!-- -->
+
+As we can see in the previous graph, in general, there are substantially
+more theft cases than other crimes. For this type of crime we do see a
+decrease after the shelter-in-place was established.
+
+``` r
+#Filter dataframe to drop theft
+chicago_crime_notheft <- chicago_crime %>%
+  filter(primary_type != "THEFT")
+
+# Plot graph 
+ggplot(chicago_crime_notheft, aes(x = date)) +
+  geom_histogram() +
+  facet_wrap(~ primary_type) +
+  labs(title = "Variation in robbery related crimes in Chicago during 2020 (no theft case)", 
+       y = "Number of reported crimes", 
+       x = "Month") 
+```
+
+![](API_query_files/figure-gfm/analysis%20no%20theft-1.png)<!-- -->
+
+We see a similar trend on the robbery cases, while burglary and vehicle
+theft did not vary much.
+
+We could argue, then, that some types of crime tended to decrease after
+the shelter-in-place measure was established, especially those regarding
+appropriation of property belonging to others, with or without violence
+(robbery and theft, correspondingly). While others, such as burglary and
+vehicle theft seemed
+    invariable.
 
 ## Session info
 
@@ -33,7 +89,7 @@ devtools::session_info()
     ##  collate  en_US.UTF-8                         
     ##  ctype    en_US.UTF-8                         
     ##  tz       America/Chicago                     
-    ##  date     2020-05-31                          
+    ##  date     2020-06-01                          
     ## 
     ## ─ Packages ───────────────────────────────────────────────────────────────────
     ##  package     * version  date       lib source        
@@ -55,6 +111,7 @@ devtools::session_info()
     ##  ellipsis      0.3.0    2019-09-20 [2] CRAN (R 3.6.3)
     ##  evaluate      0.14     2019-05-28 [2] CRAN (R 3.6.3)
     ##  fansi         0.4.1    2020-01-08 [2] CRAN (R 3.6.3)
+    ##  farver        2.0.3    2020-01-16 [2] CRAN (R 3.6.3)
     ##  forcats     * 0.5.0    2020-03-01 [2] CRAN (R 3.6.3)
     ##  fs            1.4.0    2020-03-31 [2] CRAN (R 3.6.3)
     ##  generics      0.0.2    2018-11-29 [2] CRAN (R 3.6.3)
@@ -68,6 +125,7 @@ devtools::session_info()
     ##  jsonlite      1.6.1    2020-02-02 [2] CRAN (R 3.6.3)
     ##  kableExtra  * 1.1.0    2019-03-16 [1] CRAN (R 3.6.3)
     ##  knitr         1.28     2020-02-06 [2] CRAN (R 3.6.3)
+    ##  labeling      0.3      2014-08-23 [2] CRAN (R 3.6.3)
     ##  lattice       0.20-38  2018-11-04 [2] CRAN (R 3.6.3)
     ##  lifecycle     0.2.0    2020-03-06 [2] CRAN (R 3.6.3)
     ##  lubridate     1.7.8    2020-04-06 [1] CRAN (R 3.6.3)

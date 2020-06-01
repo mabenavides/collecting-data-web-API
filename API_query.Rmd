@@ -32,17 +32,34 @@ write_csv(chicago_crime, path = "chicago_crime_2020.csv")
 With data stored in the Chicago open data website, and using the Socrata API, we are trying to determine whether there is any variation in the trends of crimes related with robbery, after the shelter-in-place measure was established in Chicago, back in March 21st. 
 
 ```{r analysis, message=FALSE}
+# Create plot for trend of crimes
 ggplot(chicago_crime, aes(x = date)) +
   geom_histogram() +
   facet_wrap(~ primary_type) +
-  labs(title = "Variation in roberry related crimes in Chicago during 2020", 
+  labs(title = "Variation in robbery related crimes in Chicago during 2020", 
        y = "Number of reported crimes", 
        x = "Month") 
 ```
 
 As we can see in the previous graph, in general, there are substantially more theft cases than other crimes. For this type of crime we do see a decrease after the shelter-in-place was established. 
 
+```{r analysis no theft, message=FALSE}
+#Filter dataframe to drop theft
+chicago_crime_notheft <- chicago_crime %>%
+  filter(primary_type != "THEFT")
 
+# Plot graph 
+ggplot(chicago_crime_notheft, aes(x = date)) +
+  geom_histogram() +
+  facet_wrap(~ primary_type) +
+  labs(title = "Variation in robbery related crimes in Chicago during 2020 (no theft case)", 
+       y = "Number of reported crimes", 
+       x = "Month") 
+```
+
+We see a similar trend on the robbery cases, while burglary and vehicle theft did not vary much. 
+
+We could argue, then, that some types of crime tended to decrease after the shelter-in-place measure was established, especially those regarding appropriation of property belonging to others, with or without violence (robbery and theft, correspondingly). While others, such as burglary and vehicle theft seemed invariable. 
 
 ## Session info
 
