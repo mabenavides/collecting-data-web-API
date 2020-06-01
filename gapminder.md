@@ -4,18 +4,6 @@ Maria Benavides
 2020-05-31
 
 ``` r
-library(tidyverse)
-library(geonames)
-library(countrycode)
-library(here)
-library(broom)
-library(kableExtra)
-
-key <- getOption("geonamesUsername") # Call geonames username to access data
-theme_set(new = theme_minimal())
-```
-
-``` r
 # Import data 
 gapminder_df <- gapminder::gapminder
 geonames_df <- GNcountryInfo() %>%

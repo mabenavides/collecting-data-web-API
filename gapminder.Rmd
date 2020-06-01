@@ -5,7 +5,7 @@ date: "`r lubridate::today()`"
 output: github_document
 ---
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, include=FALSE}
 library(tidyverse)
 library(geonames)
 library(countrycode)
@@ -13,7 +13,7 @@ library(here)
 library(broom)
 library(kableExtra)
 
-key <- getOption("geonamesUsername") # Call geonames username to access data
+getOption("geonamesUsername") # Call geonames username to access data
 theme_set(new = theme_minimal())
 ```
 
@@ -71,7 +71,7 @@ regr_table <- tidy(regression_popden_lifeexp) %>%
     ) 
 kable(regr_table, 
       digits = 3, 
-      caption = "Table correlation between life expectancy and population density"
+      caption = "Correlation between life expectancy and population density"
       ) 
 ```
 

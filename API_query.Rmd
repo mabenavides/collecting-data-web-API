@@ -1,0 +1,51 @@
+---
+title: "Crime during COVID-19 shelter in place"
+author: "Maria Benavides"
+date: "`r lubridate::today()`"
+output: github_document
+---
+
+```{r setup, message=FALSE}
+library(RSocrata) # Install and run package to access data 
+library(tidyverse)
+library(broom)
+library(kableExtra)
+```
+
+
+```{r import and tidy data, message=FALSE}
+# Import data using token
+chicago_crime <- read.socrata(
+  "https://data.cityofchicago.org/resource/ijzp-q8t2.json?year=2020",
+  app_token = getOption("socrata_token"), # Replace for your own Socrata token, email and password
+  email     = getOption("socrata_username"),
+  password  = getOption("socrata_password")
+) %>%
+  select(id, date, primary_type, arrest) %>% 
+  filter(primary_type %in% c("ROBBERY", "THEFT", "BURGLARY", "MOTOR VEHICLE THEFT"))
+
+
+# Create a csv file with the dataframe
+write_csv(chicago_crime, path = "chicago_crime_2020.csv") 
+```
+
+With data stored in the Chicago open data website, and using the Socrata API, we are trying to determine whether there is any variation in the trends of crimes related with robbery, after the shelter-in-place measure was established in Chicago, back in March 21st. 
+
+```{r analysis, message=FALSE}
+ggplot(chicago_crime, aes(x = date)) +
+  geom_histogram() +
+  facet_wrap(~ primary_type) +
+  labs(title = "Variation in roberry related crimes in Chicago during 2020", 
+       y = "Number of reported crimes", 
+       x = "Month") 
+```
+
+As we can see in the previous graph, in general, there are substantially more theft cases than other crimes. For this type of crime we do see a decrease after the shelter-in-place was established. 
+
+
+
+## Session info
+
+```{r, echo = TRUE}
+devtools::session_info()
+```
