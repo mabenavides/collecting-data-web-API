@@ -1,6 +1,9 @@
 # Collecting data from the web using an API
 
-## Maria Benavides 
+## Author: Maria Benavides 
+
+In this repository, I, first, analysed the correlation between life expectancy and population density using gapminder and geonames. Also, I 
+wrote an API query function to access data of the City of Chicago, to understand how crime changed after the shelter-in-place measure was established. 
 
 ### Libraries needed
 
@@ -11,7 +14,7 @@
 * kableExtra
 * RSocrata, for API to access Chicago Open Data  
 
-### Modified files
+### Files
 
 * [gapminder.md](gapminder.md): analysis of correlation between life expectancy and population density
 * [gapminder.Rmd](gapminder.Rmd): rendered version of previous file
