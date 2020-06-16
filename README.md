@@ -1,4 +1,4 @@
-# hw08
+# Collecting data from the web using an API
 
 ## Maria Benavides 
 
